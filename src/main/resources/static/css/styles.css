@@ -1,0 +1,70 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background-color: #f4f4f9;
+    color: #333;
+    line-height: 1.6;
+    padding: 20px;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #4b0082; /* morado oscuro */
+}
+
+input, button {
+    display: block;
+    width: 300px;
+    margin: 10px auto;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+input:focus {
+    outline: none;
+    border-color: #8a2be2; /* morado */
+    box-shadow: 0 0 5px #8a2be2;
+}
+
+button {
+    background-color: #8a2be2;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background-color: #5d0fa5;
+}
+
+#resultados, #historialResultados {
+    width: 80%;
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+p {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+p:last-child {
+    border-bottom: none;
+}
+
+.container {
+    max-width: 600px;
+    margin: auto;
+}
