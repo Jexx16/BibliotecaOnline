@@ -13,9 +13,19 @@ function login(){
     .then(data => {
         if(data && data.id){
             alert("Login correcto");
+            // Guardar datos del usuario si los necesitas después
+            localStorage.setItem('usuarioId', data.id);
+            localStorage.setItem('usuarioNombre', data.nombre);
+            // REDIRIGIR SOLO SI ES CORRECTO
+            window.location.href = "buscar.html";
         } else {
-            alert("Usuario incorrecto");
+            alert("Usuario o contraseña incorrectos");
+            // NO REDIRIGIR
         }
+    })
+    .catch(err => {
+        alert("Error al conectar con el servidor");
+        console.error(err);
     });
 }
 

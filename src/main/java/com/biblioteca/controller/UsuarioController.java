@@ -3,7 +3,7 @@ package com.biblioteca.controller;
 import org.springframework.web.bind.annotation.*;
 import com.biblioteca.repository.UsuarioRepository;
 import com.biblioteca.model.Usuario;
-
+import java.util.List;  
 @RestController
 @RequestMapping("/usuarios")
 @CrossOrigin
