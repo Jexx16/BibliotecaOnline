@@ -2,16 +2,414 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Buscar Libros</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscar Libros - Biblioteca Online</title>
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        /* Barra de navegación */
+        .navbar {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: #333;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-menu a:hover {
+            background-color: #667eea;
+            color: white;
+        }
+
+        .nav-menu a.active {
+            background-color: #667eea;
+            color: white;
+        }
+
+        .user-info {
+            color: #667eea;
+            font-weight: 500;
+            margin-right: 1rem;
+            padding: 0.5rem 1rem;
+            background-color: #f0f0ff;
+            border-radius: 20px;
+        }
+
+        .logout-btn {
+            background-color: #ff4444;
+            color: white !important;
+        }
+
+        .logout-btn:hover {
+            background-color: #cc0000 !important;
+        }
+
+        /* Contenedor principal */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        /* Cabecera de búsqueda */
+        .search-header {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .search-header h1 {
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 2.5rem;
+        }
+
+        .search-header p {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Buscador */
+        .search-box {
+            display: flex;
+            gap: 1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-box button {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .search-box button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Filtros rápidos */
+        .quick-filters {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1.5rem;
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        /* Resultados */
+        .resultados {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            min-height: 400px;
+        }
+
+        .resultados h3 {
+            color: #333;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 0.5rem;
+        }
+
+        /* Tarjeta de libro */
+        .libro-card {
+            border: none;
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .libro-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .libro-info {
+            flex: 1;
+        }
+
+        .libro-info h4 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+        }
+
+        .libro-info p {
+            color: #666;
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .disponible {
+            color: #4CAF50;
+            font-weight: 600;
+        }
+
+        .no-disponible {
+            color: #ff4444;
+            font-weight: 600;
+        }
+
+        .btn-reservar {
+            background-color: #4CAF50;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .btn-reservar:hover:not(:disabled) {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        .btn-reservar:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* Loading spinner */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-menu {
+                justify-content: center;
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .libro-card {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .btn-reservar {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Buscar Libros</h2>
-        <input id="buscar" placeholder="Título del libro">
-        <button onclick="buscarLibro()">Buscar</button>
-        <div id="resultados"></div>
+    <!-- Barra de navegación -->
+    <div class="navbar">
+        <div class="nav-brand">
+            📚 Biblioteca Online
+        </div>
+        <div class="nav-menu">
+            <span class="user-info" id="userName">Cargando...</span>
+            <a href="buscar.html" class="active">🔍 Buscar</a>
+            <a href="historial.html">📋 Historial</a>
+            <a href="javascript:logout()" class="logout-btn">🚪 Salir</a>
+        </div>
     </div>
-    <script src="js/app.js"></script>
+
+    <!-- Contenedor principal -->
+    <div class="container">
+        <!-- Cabecera de búsqueda -->
+        <div class="search-header">
+            <h1>🔍 Buscar Libros</h1>
+            <p>Encuentra tu próximo libro favorito</p>
+            
+            <div class="search-box">
+                <input type="text" id="buscar" placeholder="Título del libro... (ej: quijote, cien años)" onkeypress="if(event.key==='Enter') buscarLibro()">
+                <button onclick="buscarLibro()">
+                    <span>🔎</span> Buscar
+                </button>
+            </div>
+
+            <div class="quick-filters">
+                <button class="filter-btn" onclick="buscarLibro('quijote')">📖 El Quijote</button>
+                <button class="filter-btn" onclick="buscarLibro('cien años')">📚 Cien Años</button>
+                <button class="filter-btn" onclick="buscarLibro('clean code')">💻 Clean Code</button>
+            </div>
+        </div>
+
+        <!-- Resultados -->
+        <div class="resultados" id="resultados">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Ingresa un título para buscar libros</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="text-align: center; padding: 2rem; color: white;">
+        <p>© 2026 Biblioteca Online - Todos los derechos reservados</p>
+    </div>
+<script src="js/app.js"></script>
+<script>
+    // Mostrar nombre de usuario al cargar la página
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("✅ Página buscar.html cargada");
+        
+        let usuarioNombre = localStorage.getItem('usuarioNombre');
+        if (usuarioNombre) {
+            document.getElementById('userName').innerText = `👋 ${usuarioNombre}`;
+        }
+        
+        // Verificar que la función buscarLibro existe
+        if (typeof window.buscarLibro === 'function') {
+            console.log("✅ Función buscarLibro encontrada en app.js");
+        } else {
+            console.error("❌ Función buscarLibro NO encontrada");
+        }
+        
+        // Verificar si hay término de búsqueda en URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchTerm = urlParams.get('q');
+        if (searchTerm) {
+            document.getElementById('buscar').value = searchTerm;
+            // Pequeño retraso para asegurar que todo cargó
+            setTimeout(() => {
+                if (typeof window.buscarLibro === 'function') {
+                    window.buscarLibro();
+                }
+            }, 200);
+        }
+    });
+
+    // Función para filtros rápidos
+    window.aplicarFiltro = function(termino) {
+        console.log("Aplicando filtro:", termino);
+        document.getElementById('buscar').value = termino;
+        if (typeof window.buscarLibro === 'function') {
+            window.buscarLibro();
+        } else {
+            console.error("Error: buscarLibro no está definida");
+            alert("Error: Función de búsqueda no disponible");
+        }
+    };
+</script>
 </body>
 </html>

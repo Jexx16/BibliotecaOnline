@@ -2,16 +2,357 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Reservar Libro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservas - Biblioteca Online</title>
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        /* Barra de navegación */
+        .navbar {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: #333;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-menu a:hover {
+            background-color: #667eea;
+            color: white;
+        }
+
+        .nav-menu a.active {
+            background-color: #667eea;
+            color: white;
+        }
+
+        .user-info {
+            color: #667eea;
+            font-weight: 500;
+            margin-right: 1rem;
+            padding: 0.5rem 1rem;
+            background-color: #f0f0ff;
+            border-radius: 20px;
+        }
+
+        .logout-btn {
+            background-color: #ff4444;
+            color: white !important;
+        }
+
+        .logout-btn:hover {
+            background-color: #cc0000 !important;
+        }
+
+        /* Contenedor principal */
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        /* Tarjeta de reserva rápida */
+        .reserva-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .reserva-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .reserva-header h1 {
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .reserva-header h1 span {
+            color: #667eea;
+        }
+
+        .reserva-header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-group input[readonly] {
+            background-color: #f8f9fa;
+            cursor: not-allowed;
+        }
+
+        .btn-reservar {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 1rem 0;
+        }
+
+        .btn-reservar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-reservar:active {
+            transform: translateY(0);
+        }
+
+        .info-box {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-top: 1.5rem;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-box h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .info-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .info-box li {
+            color: #666;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-box li:before {
+            content: "📌";
+            color: #667eea;
+        }
+
+        .libro-info {
+            background-color: #e8f5e9;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border: 1px solid #4CAF50;
+        }
+
+        .libro-info p {
+            margin: 0.3rem 0;
+            color: #2e7d32;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-menu {
+                justify-content: center;
+            }
+            
+            .reserva-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Reservar libro</h2>
-        <input id="usuarioId" placeholder="ID usuario">
-        <input id="libroId" placeholder="ID libro">
-        <button onclick="reservar()">Reservar</button>
+    <!-- Barra de navegación -->
+    <div class="navbar">
+        <div class="nav-brand">
+            📚 Biblioteca Online
+        </div>
+        <div class="nav-menu">
+            <span class="user-info" id="userName">Cargando...</span>
+            <a href="buscar.html">🔍 Buscar</a>
+            <a href="historial.html">📋 Historial</a>
+            <a href="javascript:logout()" class="logout-btn">🚪 Salir</a>
+        </div>
     </div>
+
+    <!-- Contenedor principal -->
+    <div class="container">
+        <div class="reserva-card">
+            <div class="reserva-header">
+                <h1>📝 <span>Reserva</span> Rápida</h1>
+                <p>Completa los datos para reservar un libro</p>
+            </div>
+
+            <!-- Información del usuario -->
+            <div class="input-group">
+                <label>👤 Usuario ID</label>
+                <input type="text" id="usuarioIdDisplay" readonly>
+            </div>
+
+            <!-- Información del libro si viene por URL -->
+            <div id="libroInfoContainer" style="display: none;">
+                <div class="libro-info" id="libroInfo"></div>
+            </div>
+
+            <!-- Formulario de reserva -->
+            <div class="input-group">
+                <label>📖 ID del Libro</label>
+                <input type="number" id="libroId" placeholder="Ej: 1, 2, 3..." required>
+            </div>
+
+            <button class="btn-reservar" onclick="reservarLibroDirecto()">
+                📌 Confirmar Reserva
+            </button>
+
+            <!-- Información adicional -->
+            <div class="info-box">
+                <h3>📋 Reglas de reserva:</h3>
+                <ul>
+                    <li>Máximo 5 libros por usuario</li>
+                    <li>No puedes reservar el mismo libro dos veces</li>
+                    <li>Las reservas tienen una duración de 7 días</li>
+                    <li>Puedes cancelar tus reservas desde el historial</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="text-align: center; padding: 2rem; color: white;">
+        <p>© 2026 Biblioteca Online - Todos los derechos reservados</p>
+    </div>
+
     <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mostrar nombre de usuario
+            let usuarioId = localStorage.getItem('usuarioId');
+            let usuarioNombre = localStorage.getItem('usuarioNombre');
+            
+            if (!usuarioId) {
+                alert("Debes iniciar sesión primero");
+                window.location.href = "index.html";
+                return;
+            }
+            
+            document.getElementById('userName').innerText = `👋 ${usuarioNombre || 'Usuario'}`;
+            document.getElementById('usuarioIdDisplay').value = usuarioId;
+            
+            // Verificar si viene un libro por URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const libroId = urlParams.get('libroId');
+            if (libroId) {
+                document.getElementById('libroId').value = libroId;
+                // Cargar información del libro
+                fetch(API + "/libros/" + libroId)
+                    .then(r => r.json())
+                    .then(libro => {
+                        const infoHtml = `
+                            <p><strong>Título:</strong> ${libro.titulo}</p>
+                            <p><strong>Autor:</strong> ${libro.autor}</p>
+                            <p><strong>Disponible:</strong> ${libro.disponible ? '✅ Sí' : '❌ No'}</p>
+                        `;
+                        document.getElementById('libroInfo').innerHTML = infoHtml;
+                        document.getElementById('libroInfoContainer').style.display = 'block';
+                    })
+                    .catch(err => console.error("Error cargando libro:", err));
+            }
+        });
+
+        function reservarLibroDirecto() {
+            let libroId = document.getElementById('libroId').value;
+            if (!libroId) {
+                alert("Por favor ingresa el ID del libro");
+                return;
+            }
+            // Llamar a la función global de reserva
+            window.reservarLibro(parseInt(libroId));
+        }
+    </script>
 </body>
 </html>
