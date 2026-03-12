@@ -49,10 +49,10 @@ INSERT INTO usuario (nombre, password, tipo) VALUES
 -- 7. Insertar libros de prueba
 INSERT INTO libro (titulo, autor, editorial, cantidad, cantidad_disponible) VALUES 
 ('El Principito', 'Antoine de Saint-Exupéry', 'Reynal & Hitchcock', 10, 10),
-('Don Quijote', 'Miguel de Cervantes', 'Planeta', 5, 5),
-('Cien años de soledad', 'Gabriel García Márquez', 'Sudamericana', 3, 3),
-('1984', 'George Orwell', 'Debolsillo', 4, 4),
-('Clean Code', 'Robert Martin', 'Prentice Hall', 2, 2);
+('Don Quijote', 'Miguel de Cervantes', 'Planeta', 10, 10),
+('Cien años de soledad', 'Gabriel García Márquez', 'Sudamericana', 10, 10),
+('1984', 'George Orwell', 'Debolsillo', 10, 10),
+('Clean Code', 'Robert Martin', 'Prentice Hall', 10, 10);
 
 -- 8. Verificar que todo se creó correctamente
 SELECT '✅ USUARIOS CREADOS:' AS mensaje;
