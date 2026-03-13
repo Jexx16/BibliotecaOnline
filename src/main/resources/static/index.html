@@ -117,7 +117,6 @@
             transform: translateY(0);
         }
 
-        /* NUEVO: Botón de registro */
         .btn-register {
             width: 100%;
             padding: 1rem;
@@ -143,6 +142,34 @@
         }
 
         .btn-register:active {
+            transform: translateY(0);
+        }
+
+        /* Botón de catálogo público */
+        .btn-catalogo {
+            width: 100%;
+            padding: 1rem;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-catalogo:hover {
+            background: #1976D2;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(33, 150, 243, 0.3);
+        }
+
+        .btn-catalogo:active {
             transform: translateY(0);
         }
 
@@ -236,6 +263,13 @@
             color: #667eea;
             font-weight: 600;
         }
+
+        /* Mensaje informativo */
+        .info-message {
+            text-align: center;
+            margin: 1rem 0;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -264,7 +298,15 @@
             </button>
         </form>
 
-        <!-- NUEVO: Divisor y botón de registro -->
+        <!-- NUEVO: Botón de catálogo público -->
+        <div class="info-message">
+            <p>¿Quieres ver nuestros libros primero?</p>
+        </div>
+        <a href="/catalogo" class="btn-catalogo">
+            📚 Ver Catálogo sin registrarme
+        </a>
+
+        <!-- Divisor y botón de registro -->
         <div class="divider">
             <span>¿Nuevo aquí?</span>
         </div>
@@ -292,7 +334,6 @@
             alert.textContent = mensaje;
             alert.className = 'alert show alert-' + tipo;
             
-            // Ocultar después de 5 segundos
             setTimeout(() => {
                 alert.classList.remove('show');
             }, 5000);
@@ -303,7 +344,7 @@
             let password = document.getElementById("password").value;
 
             if (!usuario || !password) {
-                mostrarMensaje('Por favor completa todos los campos', 'error');
+                mostrarMensaje('❌ Por favor completa todos los campos', 'error');
                 return;
             }
 

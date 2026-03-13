@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo Público - Biblioteca Online</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .public-nav {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .public-nav h2 {
+            color: #667eea;
+            font-size: 1.5rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: all 0.3s;
+            margin-left: 0.5rem;
+        }
+
+        .nav-links a:hover {
+            background-color: #667eea;
+            color: white;
+        }
+
+        .login-btn {
+            background-color: #4CAF50;
+            color: white !important;
+        }
+
+        .login-btn:hover {
+            background-color: #45a049 !important;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .search-box {
+            display: flex;
+            gap: 1rem;
+            max-width: 600px;
+            margin: 0 auto 2rem auto;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .search-box button {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .search-box button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .resultados {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .libro-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .libro-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .libro-card h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 0.5rem;
+        }
+
+        .libro-card p {
+            color: #666;
+            margin: 0.5rem 0;
+        }
+
+        .disponible {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .no-disponible {
+            color: #f44336;
+            font-weight: bold;
+        }
+
+        .login-msg {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #666;
+            border-left: 4px solid #667eea;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            grid-column: 1/-1;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            color: #f44336;
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            grid-column: 1/-1;
+        }
+    </style>
+</head>
+<body>
+    <div class="public-nav">
+        <h2>📚 Biblioteca Online</h2>
+        <div class="nav-links">
+            <a href="/catalogo" style="background-color:#667eea; color:white;">🏠 Inicio</a>
+            <a href="/index.html" class="login-btn">🔑 Iniciar Sesión</a>
+            <a href="/registro.html">📝 Registrarse</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>📖 Catálogo de Libros</h1>
+        
+        <div class="search-box">
+            <input type="text" id="buscarInput" placeholder="Buscar por título... (ej: quijote, principito)">
+            <button onclick="buscarLibros()">🔍 Buscar</button>
+        </div>
+
+        <div id="resultados" class="resultados">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Cargando libros...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = "http://localhost:8080";
+
+        function buscarLibros() {
+            let titulo = document.getElementById("buscarInput").value.trim();
+            let url = titulo ? API + "/libros/buscar/" + encodeURIComponent(titulo) : API + "/libros/todos";
+            
+            document.getElementById("resultados").innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Buscando libros...</p>
+                </div>
+            `;
+            
+            fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Error en la búsqueda");
+                }
+                return response.json();
+            })
+            .then(data => {
+                let html = "";
+                
+                if (data.length === 0) {
+                    html = "<p style='grid-column:1/-1; text-align:center; padding:2rem; background:white; border-radius:10px;'>No se encontraron libros</p>";
+                } else {
+                    data.forEach(libro => {
+                        let disponibilidadClass = libro.cantidadDisponible > 0 ? 'disponible' : 'no-disponible';
+                        let disponibilidadTexto = libro.cantidadDisponible > 0 ? '✅ Disponible' : '❌ No disponible';
+                        
+                        html += `
+                            <div class="libro-card">
+                                <h3>${libro.titulo || 'Sin título'}</h3>
+                                <p><strong>Autor:</strong> ${libro.autor || 'No especificado'}</p>
+                                <p><strong>Editorial:</strong> ${libro.editorial || 'No especificada'}</p>
+                                <p><strong>Disponibilidad:</strong> <span class="${disponibilidadClass}">${disponibilidadTexto}</span></p>
+                                <p><strong>Copias:</strong> ${libro.cantidadDisponible || 0} de ${libro.cantidad || 0}</p>
+                                <div class="login-msg">
+                                    🔐 Inicia sesión para reservar o solicitar
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                document.getElementById("resultados").innerHTML = html;
+            })
+            .catch(error => {
+                console.error(error);
+                document.getElementById("resultados").innerHTML = `
+                    <div class="error-message">
+                        ❌ Error al cargar libros. Asegúrate de que el backend esté corriendo.
+                    </div>
+                `;
+            });
+        }
+
+        // Cargar todos los libros al iniciar
+        window.onload = buscarLibros;
+    </script>
+</body>
+</html>

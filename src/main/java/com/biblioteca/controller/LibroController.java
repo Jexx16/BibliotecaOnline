@@ -20,9 +20,16 @@ public class LibroController {
     public List<Libro> buscarPorTitulo(@PathVariable String titulo) {
         return libroRepository.findByTituloContainingIgnoreCase(titulo);
     }
+    
     @GetMapping("/{id}")
-public Libro obtenerLibro(@PathVariable Long id) {
-    return libroRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Libro no encontrado"));
-}
+    public Libro obtenerLibro(@PathVariable Long id) {
+        return libroRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Libro no encontrado"));
+    }
+    
+   
+    @GetMapping("/todos")
+    public List<Libro> todosLosLibros() {
+        return libroRepository.findAll();
+    }
 }
