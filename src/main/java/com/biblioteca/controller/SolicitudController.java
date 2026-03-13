@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import java.time.LocalDate;
 import java.util.Map;
+import java.util.List;  // ← IMPORTACIÓN AGREGADA
 
 @RestController
 @RequestMapping("/solicitudes")
@@ -60,5 +61,10 @@ public class SolicitudController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error al crear solicitud: " + e.getMessage());
         }
+    }
+    
+    @GetMapping("/usuario/{usuarioId}")
+    public List<SolicitudPrestamo> solicitudesPorUsuario(@PathVariable Long usuarioId) {
+        return solicitudRepository.findByUsuarioId(usuarioId);
     }
 }
