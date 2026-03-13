@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar Libros - Biblioteca Online</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .admin-nav {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+        .admin-nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            background: rgba(255,255,255,0.2);
+        }
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .search-box {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+        }
+        .search-box input {
+            flex: 1;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+        }
+        .search-box button {
+            padding: 0.8rem 2rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-crear {
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            background: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+        table {
+            width: 100%;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        th {
+            background: #667eea;
+            color: white;
+            padding: 1rem;
+            text-align: left;
+        }
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .btn-edit {
+            background: #2196F3;
+            color: white;
+            padding: 0.3rem 1rem;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-right: 0.5rem;
+        }
+        .btn-delete {
+            background: #f44336;
+            color: white;
+            padding: 0.3rem 1rem;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .badge-disponible {
+            background: #4CAF50;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+        }
+        .badge-no-disponible {
+            background: #f44336;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+        }
+        .modal-content input {
+            width: 100%;
+            padding: 0.8rem;
+            margin: 0.5rem 0 1rem 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+        }
+        .modal-content button {
+            padding: 0.8rem 2rem;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 1rem;
+        }
+        .modal-content .btn-cancel {
+            background: #f44336;
+        }
+        .cantidad-control {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        .cantidad-control input {
+            width: 80px;
+            text-align: center;
+        }
+        .cantidad-control button {
+            padding: 0.3rem 0.8rem;
+            background: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-nav">
+        <h2>👑 Panel de Administrador</h2>
+        <div>
+            <span id="userNameAdmin">Cargando...</span>
+            <a href="/admin/dashboard.html">🏠 Dashboard</a>
+            <a href="/index.html" onclick="logout()">🚪 Salir</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>📚 Gestión de Libros</h1>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <button class="btn-crear" onclick="abrirModalCrear()">➕ Nuevo Libro</button>
+            <div class="search-box" style="width: 300px;">
+                <input type="text" id="buscarLibro" placeholder="Buscar por título...">
+                <button onclick="buscarLibros()">🔍</button>
+            </div>
+        </div>
+
+        <table id="tablaLibros">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Título</th>
+                    <th>Autor</th>
+                    <th>Editorial</th>
+                    <th>Disponibles</th>
+                    <th>Total</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="listaLibros">
+                <tr>
+                    <td colspan="8" style="text-align: center;">Cargando libros...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal para crear/editar libro -->
+    <div id="modalLibro" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitulo">Nuevo Libro</h3>
+            <input type="hidden" id="libroId">
+            
+            <label for="titulo">Título:</label>
+            <input type="text" id="titulo" required>
+            
+            <label for="autor">Autor:</label>
+            <input type="text" id="autor" required>
+            
+            <label for="editorial">Editorial:</label>
+            <input type="text" id="editorial">
+            
+            <label for="cantidad">Cantidad total:</label>
+            <div class="cantidad-control">
+                <button onclick="decrementarCantidad()">-</button>
+                <input type="number" id="cantidad" value="1" min="1" readonly>
+                <button onclick="incrementarCantidad()">+</button>
+            </div>
+            
+            <div style="margin-top: 1rem;">
+                <button onclick="guardarLibro()">Guardar</button>
+                <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = "http://localhost:8080";
+        let libros = [];
+
+        // Verificar que es admin
+        if (localStorage.getItem('usuarioRol') !== 'ADMIN') {
+            window.location.href = "/index.html";
+        }
+
+        document.getElementById('userNameAdmin').innerText = `👋 ${localStorage.getItem('usuarioNombre')}`;
+
+        function cargarLibros() {
+            fetch(API + "/libros/todos")
+            .then(r => r.json())
+            .then(data => {
+                libros = data;
+                mostrarLibros(data);
+            })
+            .catch(err => console.error("Error cargando libros:", err));
+        }
+
+        function mostrarLibros(lista) {
+            let html = "";
+            lista.forEach(l => {
+                let badgeClass = l.cantidadDisponible > 0 ? 'badge-disponible' : 'badge-no-disponible';
+                let estadoTexto = l.cantidadDisponible > 0 ? 'DISPONIBLE' : 'NO DISPONIBLE';
+                
+                html += `
+                    <tr>
+                        <td>${l.id}</td>
+                        <td>${l.titulo}</td>
+                        <td>${l.autor || '-'}</td>
+                        <td>${l.editorial || '-'}</td>
+                        <td>${l.cantidadDisponible}</td>
+                        <td>${l.cantidad}</td>
+                        <td><span class="${badgeClass}">${estadoTexto}</span></td>
+                        <td>
+                            <button class="btn-edit" onclick="editarLibro(${l.id})">✏️ Editar</button>
+                            <button class="btn-delete" onclick="eliminarLibro(${l.id})">🗑️ Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('listaLibros').innerHTML = html || '<tr><td colspan="8" style="text-align: center;">No hay libros</td></tr>';
+        }
+
+        function buscarLibros() {
+            let termino = document.getElementById('buscarLibro').value.toLowerCase();
+            if (!termino) {
+                mostrarLibros(libros);
+                return;
+            }
+            let filtrados = libros.filter(l => 
+                l.titulo.toLowerCase().includes(termino)
+            );
+            mostrarLibros(filtrados);
+        }
+
+        function incrementarCantidad() {
+            let input = document.getElementById('cantidad');
+            input.value = parseInt(input.value) + 1;
+        }
+
+        function decrementarCantidad() {
+            let input = document.getElementById('cantidad');
+            if (parseInt(input.value) > 1) {
+                input.value = parseInt(input.value) - 1;
+            }
+        }
+
+        function abrirModalCrear() {
+            document.getElementById('modalTitulo').innerText = 'Nuevo Libro';
+            document.getElementById('libroId').value = '';
+            document.getElementById('titulo').value = '';
+            document.getElementById('autor').value = '';
+            document.getElementById('editorial').value = '';
+            document.getElementById('cantidad').value = 1;
+            document.getElementById('modalLibro').style.display = 'flex';
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalLibro').style.display = 'none';
+        }
+
+        function guardarLibro() {
+            let libro = {
+                titulo: document.getElementById('titulo').value,
+                autor: document.getElementById('autor').value,
+                editorial: document.getElementById('editorial').value,
+                cantidad: parseInt(document.getElementById('cantidad').value),
+                cantidadDisponible: parseInt(document.getElementById('cantidad').value),
+                disponible: true
+            };
+
+            if (!libro.titulo) {
+                alert('El título es obligatorio');
+                return;
+            }
+
+            let id = document.getElementById('libroId').value;
+            let url = id ? API + "/admin/libros/" + id : API + "/admin/libros";
+            let method = id ? 'PUT' : 'POST';
+
+            fetch(url, {
+                method: method,
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(libro)
+            })
+            .then(async r => {
+                if (r.ok) {
+                    alert(id ? 'Libro actualizado' : 'Libro creado');
+                    cerrarModal();
+                    cargarLibros();
+                } else {
+                    const error = await r.text();
+                    alert('Error: ' + error);
+                }
+            })
+            .catch(err => {
+                alert('Error de conexión');
+                console.error(err);
+            });
+        }
+
+        function editarLibro(id) {
+            let libro = libros.find(l => l.id === id);
+            if (!libro) return;
+            
+            document.getElementById('modalTitulo').innerText = 'Editar Libro';
+            document.getElementById('libroId').value = libro.id;
+            document.getElementById('titulo').value = libro.titulo;
+            document.getElementById('autor').value = libro.autor || '';
+            document.getElementById('editorial').value = libro.editorial || '';
+            document.getElementById('cantidad').value = libro.cantidad;
+            document.getElementById('modalLibro').style.display = 'flex';
+        }
+
+        function eliminarLibro(id) {
+            if (!confirm('¿Estás seguro de eliminar este libro?')) return;
+            
+            fetch(API + "/admin/libros/" + id, { method: 'DELETE' })
+            .then(async r => {
+                if (r.ok) {
+                    alert('Libro eliminado');
+                    cargarLibros();
+                } else {
+                    const error = await r.text();
+                    alert('Error: ' + error);
+                }
+            });
+        }
+
+        function logout() {
+            localStorage.removeItem('usuarioId');
+            localStorage.removeItem('usuarioNombre');
+            localStorage.removeItem('usuarioRol');
+            window.location.href = "/index.html";
+        }
+
+        cargarLibros();
+    </script>
+</body>
+</html>

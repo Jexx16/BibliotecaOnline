@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrador - Biblioteca Online</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .admin-nav {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+        .admin-nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            background: rgba(255,255,255,0.2);
+        }
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        .stat-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .stat-card h3 {
+            font-size: 2.5rem;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+        .admin-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .admin-link {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-decoration: none;
+            color: #333;
+            text-align: center;
+            font-weight: bold;
+            transition: all 0.3s;
+            border: 2px solid #667eea;
+        }
+        .admin-link:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-3px);
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-nav">
+        <h2>👑 Panel de Administrador</h2>
+        <div>
+            <span id="userNameAdmin">Cargando...</span>
+            <a href="/index.html" onclick="logout()">🚪 Salir</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>📊 Bienvenido, Administrador</h1>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <h3 id="totalUsuarios">-</h3>
+                <p>Usuarios registrados</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="totalLibros">-</h3>
+                <p>Libros en catálogo</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="solicitudesPendientes">-</h3>
+                <p>Solicitudes pendientes</p>
+            </div>
+        </div>
+
+        <div class="admin-links">
+            <a href="/admin/usuarios.html" class="admin-link">👥 Gestionar Usuarios</a>
+            <a href="/admin/libros.html" class="admin-link">📚 Gestionar Libros</a>
+            <a href="/admin/solicitudes.html" class="admin-link">📋 Solicitudes de Préstamo</a>
+            <a href="/libros.html" class="admin-link">👁️ Ver Catálogo Público</a>
+        </div>
+    </div>
+
+    <script>
+        const API = "http://localhost:8080";
+        
+        // Verificar que es admin
+        if (localStorage.getItem('usuarioRol') !== 'ADMIN') {
+            window.location.href = "/index.html";
+        }
+
+        let adminNombre = localStorage.getItem('usuarioNombre');
+        document.getElementById('userNameAdmin').innerText = `👋 ${adminNombre || 'Admin'}`;
+
+        // Cargar estadísticas
+        function cargarEstadisticas() {
+            // Total usuarios
+            fetch(API + "/admin/usuarios")
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('totalUsuarios').textContent = data.length;
+            })
+            .catch(err => console.error("Error cargando usuarios:", err));
+
+            // Total libros
+            fetch(API + "/libros/todos")
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('totalLibros').textContent = data.length;
+            })
+            .catch(err => console.error("Error cargando libros:", err));
+
+            // Solicitudes pendientes
+            fetch(API + "/admin/solicitudes/pendientes")
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('solicitudesPendientes').textContent = data.length;
+            })
+            .catch(err => {
+                document.getElementById('solicitudesPendientes').textContent = '0';
+                console.log("Endpoint de solicitudes no disponible");
+            });
+        }
+
+        function logout() {
+            localStorage.removeItem('usuarioId');
+            localStorage.removeItem('usuarioNombre');
+            localStorage.removeItem('usuarioRol');
+            window.location.href = "/index.html";
+        }
+
+        cargarEstadisticas();
+    </script>
+</body>
+</html>

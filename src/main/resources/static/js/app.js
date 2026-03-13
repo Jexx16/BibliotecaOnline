@@ -8,7 +8,7 @@ function login() {
     let password = document.getElementById("password").value;
 
     if (!usuario || !password) {
-        mostrarNotificacion('❌ Por favor completa todos los campos', 'error');
+        mostrarMensaje('❌ Por favor completa todos los campos', 'error');
         return;
     }
 
@@ -18,7 +18,6 @@ function login() {
         body: JSON.stringify({nombre: usuario, password: password})
     })
     .then(async response => {
-        console.log("Respuesta login status:", response.status);
         if (response.ok) {
             return response.json();
         } else {
@@ -27,22 +26,32 @@ function login() {
         }
     })
     .then(data => {
-        console.log("Login exitoso:", data);
         if (data && data.id) {
-            mostrarNotificacion('✅ Login exitoso! Redirigiendo...', 'success');
+            mostrarMensaje('✅ Login exitoso! Redirigiendo...', 'success');
+            
+            // Guardar datos en localStorage
             localStorage.setItem('usuarioId', data.id);
             localStorage.setItem('usuarioNombre', data.nombre);
+            localStorage.setItem('usuarioRol', data.rol || 'USER');
             
+            console.log("Rol del usuario:", data.rol);
+            console.log("Redirigiendo según rol...");
+            
+            // 🔥 REDIRECCIÓN CORREGIDA
             setTimeout(() => {
-                window.location.href = "buscar.html";
+                if (data.rol === 'ADMIN') {
+                    window.location.href = "/admin/dashboard.html";
+                } else {
+                    window.location.href = "buscar.html";
+                }
             }, 1500);
         } else {
-            mostrarNotificacion('❌ Usuario o contraseña incorrectos', 'error');
+            mostrarMensaje('❌ Usuario o contraseña incorrectos', 'error');
         }
     })
     .catch(err => {
         console.error("Error en login:", err);
-        mostrarNotificacion('❌ Error al conectar con el servidor', 'error');
+        mostrarMensaje('❌ Error al conectar con el servidor', 'error');
     });
 }
 
@@ -102,25 +111,24 @@ function buscarLibro() {
             data.forEach((libro, index) => {
                 console.log(`6. Libro ${index + 1}:`, libro.titulo);
                 
-                // Determinar estado de disponibilidad
-                let disponible = libro.cantidadDisponible > 0;
-                let estadoClass = disponible ? 'disponible' : 'no-disponible';
-                let estadoTexto = disponible ? '✅ Sí' : '❌ No';
-                
                 html += `
                     <div class="libro-card">
                         <div class="libro-info">
                             <h4>${libro.titulo || 'Sin título'}</h4>
                             <p><strong>Autor:</strong> ${libro.autor || 'No especificado'}</p>
                             <p><strong>Editorial:</strong> ${libro.editorial || 'No especificada'}</p>
-                            <p><strong>Disponibilidad:</strong> <span class="${estadoClass}">${estadoTexto}</span></p>
                             <p><strong>Copias disponibles:</strong> ${libro.cantidadDisponible || 0} de ${libro.cantidad || 0}</p>
                         </div>
-                        ${libro.cantidadDisponible > 0 ? 
-                            `<button class="btn-reservar" onclick="reservarLibro(${libro.id})">
-                                📌 Reservar (${libro.cantidadDisponible} disp.)
-                            </button>` : 
-                            '<button class="btn-reservar" disabled>❌ Agotado</button>'}
+                        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                            ${libro.cantidadDisponible > 0 ? 
+                                `<button class="btn-reservar" onclick="reservarLibro(${libro.id})" style="background-color:#4CAF50;">
+                                    📌 Reservar (${libro.cantidadDisponible} disp.)
+                                </button>
+                                <button class="btn-pedir" onclick="pedirLibro(${libro.id})" style="background-color:#2196F3;">
+                                    📦 Pedir préstamo
+                                </button>` : 
+                                '<button class="btn-reservar" disabled>❌ Agotado</button>'}
+                        </div>
                     </div>
                 `;
             });
@@ -135,7 +143,7 @@ function buscarLibro() {
     });
 }
 
-// ==================== FUNCIONES DE RESERVA  ====================
+// ==================== FUNCIONES DE RESERVA ====================
 function reservarLibro(libroId) {
     console.log("=== reservarLibro EJECUTADA ===");
     
@@ -211,23 +219,73 @@ function reservarLibro(libroId) {
         mostrarNotificacion(`✅ "${libro.titulo}" reservado con éxito`, "success");
         buscarLibro(); // Actualizar la lista de búsqueda
     })
-  .catch(error => {
-    console.error("Error en reserva:", error);
+    .catch(error => {
+        console.error("Error en reserva:", error);
+        
+        // Limpiar el mensaje de error (quitar cosas raras)
+        let mensajeError = error.message;
+        
+        // Si el mensaje viene con HTML o caracteres raros, extraer solo la parte útil
+        if (mensajeError.includes("Límite de 5 reservas")) {
+            mensajeError = "❌ Has alcanzado el límite de 5 reservas. No puedes reservar más.";
+        } else if (mensajeError.includes("Ya has reservado este libro")) {
+            mensajeError = "❌ Ya has reservado este libro anteriormente.";
+        } else if (mensajeError.includes("No hay copias disponibles")) {
+            mensajeError = "❌ No hay copias disponibles de este libro.";
+        }
+        
+        mostrarNotificacion(mensajeError, "error");
+    });
+}
+
+// ==================== NUEVA FUNCIÓN: PEDIR PRÉSTAMO ====================
+function pedirLibro(libroId) {
+    console.log("=== pedirLibro EJECUTADA ===");
     
-    // Limpiar el mensaje de error (quitar cosas raras)
-    let mensajeError = error.message;
+    let usuarioId = localStorage.getItem('usuarioId');
     
-    // Si el mensaje viene con HTML o caracteres raros, extraer solo la parte útil
-    if (mensajeError.includes("Límite de 5 reservas")) {
-        mensajeError = "❌ Has alcanzado el límite de 5 reservas. No puedes reservar más.";
-    } else if (mensajeError.includes("Ya has reservado este libro")) {
-        mensajeError = "❌ Ya has reservado este libro anteriormente.";
-    } else if (mensajeError.includes("No hay copias disponibles")) {
-        mensajeError = "❌ No hay copias disponibles de este libro.";
+    if (!usuarioId) {
+        mostrarNotificacion("⚠️ Debes iniciar sesión primero", "error");
+        setTimeout(() => {
+            window.location.href = "index.html";
+        }, 2000);
+        return;
     }
     
-    mostrarNotificacion(mensajeError, "error");
-});
+    console.log("Usuario ID:", usuarioId);
+    console.log("Libro ID:", libroId);
+    
+    if (!confirm("📦 ¿Solicitar préstamo de este libro? (Será revisado por un administrador)")) {
+        return;
+    }
+    
+    mostrarNotificacion("⏳ Enviando solicitud...", "info");
+    
+    fetch(API + "/solicitudes", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            usuarioId: parseInt(usuarioId),
+            libroId: parseInt(libroId)
+        })
+    })
+    .then(async response => {
+        if (response.ok) {
+            const data = await response.json();
+            return data;
+        } else {
+            const error = await response.text();
+            throw new Error(error);
+        }
+    })
+    .then(data => {
+        console.log("Solicitud enviada:", data);
+        mostrarNotificacion("✅ Solicitud enviada al administrador", "success");
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        mostrarNotificacion("❌ Error: " + error.message, "error");
+    });
 }
 
 // ==================== FUNCIONES DE HISTORIAL ====================
@@ -362,7 +420,7 @@ function cancelarReserva(reservaId) {
     });
 }
 
-// ==================== FUNCIÓN DE NOTIFICACIONES  ====================
+// ==================== FUNCIÓN DE NOTIFICACIONES ====================
 function mostrarNotificacion(mensaje, tipo) {
     // Eliminar notificación existente si la hay
     let notificacionExistente = document.getElementById('notificacion');
@@ -484,6 +542,7 @@ function logout() {
     console.log("=== logout EJECUTADO ===");
     localStorage.removeItem('usuarioId');
     localStorage.removeItem('usuarioNombre');
+    localStorage.removeItem('usuarioRol');
     mostrarNotificacion("👋 Sesión cerrada correctamente", "info");
     setTimeout(() => {
         window.location.href = "index.html";

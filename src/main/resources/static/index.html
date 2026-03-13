@@ -298,7 +298,7 @@
             </button>
         </form>
 
-        <!-- NUEVO: Botón de catálogo público -->
+        <!-- Botón de catálogo público -->
         <div class="info-message">
             <p>¿Quieres ver nuestros libros primero?</p>
         </div>
@@ -327,8 +327,6 @@
 
     <script src="js/app.js"></script>
     <script>
-        const API = "http://localhost:8080";
-
         function mostrarMensaje(mensaje, tipo) {
             const alert = document.getElementById('alertMessage');
             alert.textContent = mensaje;
@@ -348,7 +346,7 @@
                 return;
             }
 
-            fetch(API + "/usuarios/login", {
+            fetch("http://localhost:8080/usuarios/login", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({nombre: usuario, password: password})
@@ -364,11 +362,21 @@
             .then(data => {
                 if (data && data.id) {
                     mostrarMensaje('✅ Login exitoso! Redirigiendo...', 'success');
+                    
+                    // Guardar datos en localStorage
                     localStorage.setItem('usuarioId', data.id);
                     localStorage.setItem('usuarioNombre', data.nombre);
+                    localStorage.setItem('usuarioRol', data.rol || 'USER');
                     
+                    console.log("Rol del usuario:", data.rol);
+                    
+                    // Redirección según rol
                     setTimeout(() => {
-                        window.location.href = "buscar.html";
+                        if (data.rol === 'ADMIN') {
+                            window.location.href = "/admin/dashboard.html";
+                        } else {
+                            window.location.href = "buscar.html";
+                        }
                     }, 1500);
                 } else {
                     mostrarMensaje('❌ Usuario o contraseña incorrectos', 'error');

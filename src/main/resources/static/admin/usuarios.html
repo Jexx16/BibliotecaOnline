@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar Usuarios - Biblioteca Online</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .admin-nav {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+        .admin-nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            background: rgba(255,255,255,0.2);
+        }
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .search-box {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+        }
+        .search-box input {
+            flex: 1;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+        }
+        .search-box button {
+            padding: 0.8rem 2rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-crear {
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            background: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+        table {
+            width: 100%;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        th {
+            background: #667eea;
+            color: white;
+            padding: 1rem;
+            text-align: left;
+        }
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .btn-edit {
+            background: #2196F3;
+            color: white;
+            padding: 0.3rem 1rem;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-right: 0.5rem;
+        }
+        .btn-delete {
+            background: #f44336;
+            color: white;
+            padding: 0.3rem 1rem;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .badge-admin {
+            background: #4CAF50;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+        }
+        .badge-user {
+            background: #2196F3;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+        }
+        .modal-content input, .modal-content select {
+            width: 100%;
+            padding: 0.8rem;
+            margin: 0.5rem 0 1rem 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+        }
+        .modal-content button {
+            padding: 0.8rem 2rem;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 1rem;
+        }
+        .modal-content .btn-cancel {
+            background: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-nav">
+        <h2>👑 Panel de Administrador</h2>
+        <div>
+            <span id="userNameAdmin">Cargando...</span>
+            <a href="/admin/dashboard.html">🏠 Dashboard</a>
+            <a href="/index.html" onclick="logout()">🚪 Salir</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>👥 Gestión de Usuarios</h1>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <button class="btn-crear" onclick="abrirModalCrear()">➕ Nuevo Usuario</button>
+            <div class="search-box" style="width: 300px;">
+                <input type="text" id="buscarUsuario" placeholder="Buscar por nombre...">
+                <button onclick="buscarUsuarios()">🔍</button>
+            </div>
+        </div>
+
+        <table id="tablaUsuarios">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Rol</th>
+                    <th>Tipo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="listaUsuarios">
+                <tr>
+                    <td colspan="5" style="text-align: center;">Cargando usuarios...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal para crear/editar usuario -->
+    <div id="modalUsuario" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitulo">Nuevo Usuario</h3>
+            <input type="hidden" id="usuarioId">
+            
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" required>
+            
+            <label for="password">Contraseña:</label>
+            <input type="password" id="password" placeholder="Mínimo 6 caracteres">
+            
+            <label for="rol">Rol:</label>
+            <select id="rol">
+                <option value="USER">Usuario normal</option>
+                <option value="ADMIN">Administrador</option>
+            </select>
+            
+            <label for="tipo">Tipo:</label>
+            <select id="tipo">
+                <option value="usuario">Usuario</option>
+                <option value="admin">Admin</option>
+            </select>
+            
+            <div style="margin-top: 1rem;">
+                <button onclick="guardarUsuario()">Guardar</button>
+                <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = "http://localhost:8080";
+        let usuarios = [];
+
+        // Verificar que es admin
+        if (localStorage.getItem('usuarioRol') !== 'ADMIN') {
+            window.location.href = "/index.html";
+        }
+
+        document.getElementById('userNameAdmin').innerText = `👋 ${localStorage.getItem('usuarioNombre')}`;
+
+        function cargarUsuarios() {
+            fetch(API + "/admin/usuarios")
+            .then(r => r.json())
+            .then(data => {
+                usuarios = data;
+                mostrarUsuarios(data);
+            })
+            .catch(err => console.error("Error cargando usuarios:", err));
+        }
+
+        function mostrarUsuarios(lista) {
+            let html = "";
+            lista.forEach(u => {
+                let badgeClass = u.rol === 'ADMIN' ? 'badge-admin' : 'badge-user';
+                html += `
+                    <tr>
+                        <td>${u.id}</td>
+                        <td>${u.nombre}</td>
+                        <td><span class="${badgeClass}">${u.rol}</span></td>
+                        <td>${u.tipo}</td>
+                        <td>
+                            <button class="btn-edit" onclick="editarUsuario(${u.id})">✏️ Editar</button>
+                            <button class="btn-delete" onclick="eliminarUsuario(${u.id})">🗑️ Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('listaUsuarios').innerHTML = html || '<tr><td colspan="5" style="text-align: center;">No hay usuarios</td></tr>';
+        }
+
+        function buscarUsuarios() {
+            let termino = document.getElementById('buscarUsuario').value.toLowerCase();
+            if (!termino) {
+                mostrarUsuarios(usuarios);
+                return;
+            }
+            let filtrados = usuarios.filter(u => 
+                u.nombre.toLowerCase().includes(termino)
+            );
+            mostrarUsuarios(filtrados);
+        }
+
+        function abrirModalCrear() {
+            document.getElementById('modalTitulo').innerText = 'Nuevo Usuario';
+            document.getElementById('usuarioId').value = '';
+            document.getElementById('nombre').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('rol').value = 'USER';
+            document.getElementById('tipo').value = 'usuario';
+            document.getElementById('modalUsuario').style.display = 'flex';
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalUsuario').style.display = 'none';
+        }
+
+        function guardarUsuario() {
+            let usuario = {
+                nombre: document.getElementById('nombre').value,
+                password: document.getElementById('password').value,
+                rol: document.getElementById('rol').value,
+                tipo: document.getElementById('tipo').value
+            };
+
+            if (!usuario.nombre) {
+                alert('El nombre es obligatorio');
+                return;
+            }
+
+            if (!usuario.password || usuario.password.length < 6) {
+                alert('La contraseña debe tener al menos 6 caracteres');
+                return;
+            }
+
+            let id = document.getElementById('usuarioId').value;
+            let url = id ? API + "/admin/usuarios/" + id : API + "/admin/usuarios";
+            let method = id ? 'PUT' : 'POST';
+
+            fetch(url, {
+                method: method,
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(usuario)
+            })
+            .then(async r => {
+                if (r.ok) {
+                    alert(id ? 'Usuario actualizado' : 'Usuario creado');
+                    cerrarModal();
+                    cargarUsuarios();
+                } else {
+                    const error = await r.text();
+                    alert('Error: ' + error);
+                }
+            })
+            .catch(err => {
+                alert('Error de conexión');
+                console.error(err);
+            });
+        }
+
+        function editarUsuario(id) {
+            let usuario = usuarios.find(u => u.id === id);
+            if (!usuario) return;
+            
+            document.getElementById('modalTitulo').innerText = 'Editar Usuario';
+            document.getElementById('usuarioId').value = usuario.id;
+            document.getElementById('nombre').value = usuario.nombre;
+            document.getElementById('password').value = '';
+            document.getElementById('rol').value = usuario.rol;
+            document.getElementById('tipo').value = usuario.tipo;
+            document.getElementById('modalUsuario').style.display = 'flex';
+        }
+
+        function eliminarUsuario(id) {
+            if (!confirm('¿Estás seguro de eliminar este usuario?')) return;
+            
+            fetch(API + "/admin/usuarios/" + id, { method: 'DELETE' })
+            .then(async r => {
+                if (r.ok) {
+                    alert('Usuario eliminado');
+                    cargarUsuarios();
+                } else {
+                    const error = await r.text();
+                    alert('Error: ' + error);
+                }
+            });
+        }
+
+        function logout() {
+            localStorage.removeItem('usuarioId');
+            localStorage.removeItem('usuarioNombre');
+            localStorage.removeItem('usuarioRol');
+            window.location.href = "/index.html";
+        }
+
+        cargarUsuarios();
+    </script>
+</body>
+</html>

@@ -2,6 +2,7 @@ package com.biblioteca.controller;
 
 import com.biblioteca.model.Reserva;
 import com.biblioteca.service.ReservaService;
+import com.biblioteca.repository.ReservaRepository;  // ← IMPORTANTE: importar el repositorio
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -14,11 +15,14 @@ import java.util.Map;
 public class ReservaController {
     
     private final ReservaService reservaService;
-    
-    public ReservaController(ReservaService reservaService) {
+    private final ReservaRepository reservaRepository;  // ← DECLARAR EL REPOSITORIO
+
+    // Constructor con AMBOS parámetros
+    public ReservaController(ReservaService reservaService, ReservaRepository reservaRepository) {
         this.reservaService = reservaService;
+        this.reservaRepository = reservaRepository;  // ← INICIALIZAR
     }
-    
+
     @PostMapping
     public ResponseEntity<?> crearReserva(@RequestBody Map<String, Long> payload) {
         try {
@@ -29,7 +33,6 @@ public class ReservaController {
             return ResponseEntity.ok(reserva);
             
         } catch (RuntimeException e) {
-            // Devolver SOLO el mensaje de error, sin HTML
             return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(e.getMessage());
@@ -39,7 +42,7 @@ public class ReservaController {
                 .body("Error interno del servidor");
         }
     }
-    
+
     @GetMapping("/usuario/{usuarioId}")
     public ResponseEntity<?> historial(@PathVariable Long usuarioId) {
         try {
@@ -51,7 +54,7 @@ public class ReservaController {
                 .body("Error al obtener historial");
         }
     }
-    
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> cancelarReserva(@PathVariable Long id) {
         try {
@@ -66,5 +69,10 @@ public class ReservaController {
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Error al cancelar reserva");
         }
+    }
+
+    @GetMapping("/todas")
+    public List<Reserva> todasLasReservas() {
+        return reservaRepository.findAll();  // ← AHORA SÍ FUNCIONA
     }
 }
